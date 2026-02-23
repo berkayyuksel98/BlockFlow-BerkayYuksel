@@ -1,38 +1,73 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
-
 public enum AudioType
 {
-    EarnMoney
+    DragStart,
+    DragEnd,
+    BlockExit,
+    LevelWin,
+    LevelLose,
 }
-// EventBus üzerinden gelen eventlere göre ilgili ses efektlerini oynatan servis sinifi 
-//TODO: MonoBehaviour olmayan bir servis olarak düzenlenecek
-public class AudioController : MonoBehaviour
-{
-    [SerializeField] private List<AudioData> audioDatas = new List<AudioData>();
-    private AudioSource audioSource;
 
+// EventBus üzerinden gelen eventlere göre ses efektlerini oynatan pure C# servis
+public class AudioController : IInitializable, IDisposable
+{
+    private readonly IEventBus eventBus;
+    private readonly AudioConfig audioConfig;
+    private readonly AudioSource audioSource;
 
     [Inject]
-    public void Construct(EventBus eventBus)
+    public AudioController(IEventBus eventBus, AudioConfig audioConfig, Camera camera)
     {
-        
+        this.eventBus = eventBus;
+        this.audioConfig = audioConfig;
+        audioSource = camera.GetComponent<AudioSource>();
     }
 
-    private void Awake()
+    public void Initialize()
     {
-        audioSource = Camera.main.GetComponent<AudioSource>();
+        eventBus.Subscribe<DragStartedEvent>(OnDragStarted);
+        eventBus.Subscribe<DragEndedEvent>(OnDragEnded);
+        eventBus.Subscribe<BlockExitStartedEvent>(OnBlockExited);
+        eventBus.Subscribe<LevelCompletedEvent>(OnLevelCompleted);
     }
-   
-    private void PlayAudio(AudioType type)
+
+    public void Dispose()
     {
-        var audioData = audioDatas.Find(a => a.audioType == type);
-        if (audioData != null && audioSource != null)
+        eventBus?.Unsubscribe<DragStartedEvent>(OnDragStarted);
+        eventBus?.Unsubscribe<DragEndedEvent>(OnDragEnded);
+        eventBus?.Unsubscribe<BlockExitStartedEvent>(OnBlockExited);
+        eventBus?.Unsubscribe<LevelCompletedEvent>(OnLevelCompleted);
+    }
+
+    private void OnDragStarted(DragStartedEvent e) => Play(AudioType.DragStart);
+    private void OnDragEnded(DragEndedEvent e) => Play(AudioType.DragEnd);
+    private void OnBlockExited(BlockExitStartedEvent e) => Play(AudioType.BlockExit);
+    private void OnLevelCompleted(LevelCompletedEvent e)
+        => Play(e.IsWin ? AudioType.LevelWin : AudioType.LevelLose);
+
+    private void Play(AudioType type)
+    {
+        if (audioSource == null)
         {
-            audioSource.PlayOneShot(audioData.GetRandomClip(),audioData.Volume());
+            Debug.LogError($"[AudioController] AudioSource bulunamadı!");
+            return;
         }
+        AudioData data = audioConfig?.Get(type);
+        if (data == null)
+        {
+            Debug.LogWarning($"[AudioController] AudioConfig'te {type} için veri bulunamadı!");
+            return;
+        }
+        AudioClip clip = data.GetRandomClip();
+        if (clip == null)
+        {
+            Debug.LogWarning($"[AudioController] AudioData'da {type} için clip bulunamadı!");
+            return;
+        }
+        if (clip != null) audioSource.PlayOneShot(clip, data.Volume());
     }
 }
+

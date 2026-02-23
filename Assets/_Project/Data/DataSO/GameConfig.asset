@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e2a170dc1bc440dc9a49d523e9d9656, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: 
+  Levels:
+  - {fileID: 4900000, guid: ab0c282d0e8ad4a93a0fea3120cd2ea3, type: 3}
+  - {fileID: 4900000, guid: f3dfeef5dccca4b849b4b3e6c1531957, type: 3}
+  - {fileID: 4900000, guid: b5d410b9995b94f0fb5d7fcf299199fa, type: 3}
+  - {fileID: 4900000, guid: 5db1f0a69a6804ea29966c658ec98aaa, type: 3}
+  - {fileID: 4900000, guid: 1c0f5b111dd864de1bd705c383c19ce6, type: 3}
+  BlockShapes:
+  - {fileID: 11400000, guid: 72112fb8d1988409e8a84b9ca75bb22b, type: 2}
+  - {fileID: 11400000, guid: 3a944e85539a3423da9d85b14401d040, type: 2}
+  - {fileID: 11400000, guid: cc0253b4bcb11432394211c2f76ca6c0, type: 2}
+  - {fileID: 11400000, guid: 652dd529abdd74d31baf9ea1ecaabbd8, type: 2}
+  - {fileID: 11400000, guid: 4e57bbe036ce4418e9910146ebe620d7, type: 2}
+  - {fileID: 11400000, guid: 4c4e43b2c676d465495d611624c63ad2, type: 2}
+  - {fileID: 11400000, guid: 6c224cfa6f1e74739b17e6aed3f07c44, type: 2}
+  - {fileID: 11400000, guid: 0a0b14605fab547c8aacb6c653274e60, type: 2}
+  - {fileID: 11400000, guid: ca8455d9978604d918497c291e1ad365, type: 2}
+  WallPrefab: {fileID: 1923803197536969930, guid: 67fe8a31897c54eb2ab6769f6196011e,
+    type: 3}
+  CornerPrefab: {fileID: 1568659128996779066, guid: f803192afa9724b718561d9bb3451e47,
+    type: 3}
+  gridCellPrefab: {fileID: 43654395327080663, guid: 81b3c5be4d4184a578378076d3f0a81d,
+    type: 3}
+  ExitPrefabsBySize:
+  - {fileID: 5179015295737687333, guid: 2c7f256d31a6b4d5f9c4fec2349d0189, type: 3}
+  - {fileID: 8383473687706931702, guid: f11670022361441bba7de0d1e5accd7f, type: 3}
+  - {fileID: 8383473687706931702, guid: 284c95a2a4d3b4c78b0573f8f198eeb0, type: 3}
+  IceBehaviourConfig: {fileID: 11400000, guid: 520f6adc1a30b4708b62253dc98a8a04, type: 2}
+  BlockColors:
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 0.69942856, b: 1, a: 1}
+  - {r: 0.3455565, g: 1, b: 0, a: 1}
+  - {r: 1, g: 0.7343469, b: 0, a: 1}
+  - {r: 0.6713352, g: 0, b: 1, a: 1}
+  VFXConfig: {fileID: 11400000, guid: 9b691c77d06a8406a8e6b8392b319ddf, type: 2}
+  AudioConfig: {fileID: 11400000, guid: 463f26b0c0dda4e96b9b15f9ab937fc0, type: 2}

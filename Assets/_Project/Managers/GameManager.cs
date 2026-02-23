@@ -42,27 +42,23 @@ public class GameManager : IInitializable, IDisposable
     public void PauseGame()
     {
         if (CurrentState != GameState.Playing) return;
-        Time.timeScale = 0f;
         SetState(GameState.Paused);
     }
 
     public void ResumeGame()
     {
         if (CurrentState != GameState.Paused) return;
-        Time.timeScale = 1f;
         SetState(GameState.Playing);
     }
 
     public void RestartLevel()
     {
-        Time.timeScale = 1f;
         SetState(GameState.Playing);
         levelManager.ReloadCurrentLevel();
     }
 
     public void GoToNextLevel()
     {
-        Time.timeScale = 1f;
         SetState(GameState.Playing);
         levelManager.LoadNextLevel();
     }
@@ -82,7 +78,6 @@ public class GameManager : IInitializable, IDisposable
     }
     private void OnLevelCompleted(LevelCompletedEvent e)
     {
-        Time.timeScale = 0f;
         SetState(e.IsWin ? GameState.Win : GameState.Lose);
     }
 

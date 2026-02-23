@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -6,42 +7,70 @@ using Zenject;
 public class UIManager : IInitializable, IDisposable
 {
     private readonly IEventBus eventBus;
+    private readonly ILevelManager levelManager;
+    private readonly GameplayPanel gameplayPanel;
+    private readonly WinPanel winPanel;
+    private readonly LosePanel losePanel;
+    private readonly System.Threading.CancellationTokenSource cts = new();
 
     [Inject]
-    public UIManager(IEventBus eventBus)
+    public UIManager(IEventBus eventBus, ILevelManager levelManager,
+                     GameplayPanel gameplayPanel, WinPanel winPanel, LosePanel losePanel)
     {
         this.eventBus = eventBus;
+        this.levelManager = levelManager;
+        this.gameplayPanel = gameplayPanel;
+        this.winPanel = winPanel;
+        this.losePanel = losePanel;
     }
 
-    // Başlangıç panelini göster ve EventBus aboneliklerini kur
     public void Initialize()
     {
+        eventBus.Subscribe<LevelLoadedEvent>(OnLevelLoaded);
         eventBus.Subscribe<LevelCompletedEvent>(OnLevelCompleted);
+
+        winPanel.Hide();
+        losePanel.Hide();
+        gameplayPanel.Show(levelManager.CurrentLevelIndex);
     }
 
-    // Abonelikleri temizler
     public void Dispose()
     {
+        eventBus?.Unsubscribe<LevelLoadedEvent>(OnLevelLoaded);
         eventBus?.Unsubscribe<LevelCompletedEvent>(OnLevelCompleted);
+        cts.Cancel();
+        cts.Dispose();
     }
 
-    private void OnLevelCompleted(LevelCompletedEvent e)
-    {
-        ShowResultPanel(e.IsWin);
-    }
+    private void OnLevelLoaded(LevelLoadedEvent e) => ShowGameplayPanel(e.LevelIndex);
+
+    private void OnLevelCompleted(LevelCompletedEvent e) => ShowResultPanel(e.IsWin);
 
     public void ShowGameplayPanel(int levelIndex)
     {
+        winPanel.Hide();
+        losePanel.Hide();
+        gameplayPanel.Show(levelIndex);
     }
 
     public void ShowResultPanel(bool isWin)
     {
+        ShowResultPanelDelayed(isWin).Forget();
     }
 
-    // Tum panelleri gizler
+    private async UniTaskVoid ShowResultPanelDelayed(bool isWin)
+    {
+        await UniTask.WaitForSeconds(1f, ignoreTimeScale: true, cancellationToken: cts.Token);
+        gameplayPanel.Hide();
+        if (isWin) { losePanel.Hide(); winPanel.Show(); }
+        else { winPanel.Hide(); losePanel.Show(); }
+    }
+
     public void HideAllPanels()
     {
+        gameplayPanel.Hide();
+        winPanel.Hide();
+        losePanel.Hide();
     }
-
-
 }
+

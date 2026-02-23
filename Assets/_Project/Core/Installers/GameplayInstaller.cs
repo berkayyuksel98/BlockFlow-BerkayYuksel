@@ -9,9 +9,20 @@ public class GameplayInstaller : MonoInstaller
     // Tüm prefab ve shape tanımlarını içeren merkezi ScriptableObject
     [SerializeField] private GameConfig gameConfig;
 
+    [Header("References")]
+    [SerializeField] private Camera gameCamera;
+
+    [Header("UI Panels")]
+    [SerializeField] private GameplayPanel gameplayPanel;
+    [SerializeField] private WinPanel winPanel;
+    [SerializeField] private LosePanel losePanel;
+
     [Header("Test")]
     // Test MockLevelManager için bool
     [SerializeField] private bool useMockLevelManager = false;
+
+    [Header("Debug")]
+    [SerializeField] private GridDebugger gridDebugger;
 
     public override void InstallBindings()
     {
@@ -20,6 +31,17 @@ public class GameplayInstaller : MonoInstaller
 
         // GameConfig ScriptableObject — BlockFactory ve GridManager tarafından kullanılır
         Container.BindInstance(gameConfig).AsSingle();
+
+        // Camera — InputManager tarafından ray cast için kullanılır
+        Container.BindInstance(gameCamera).AsSingle();
+
+        // CameraCalculator — kamerayı grid boyutuna göre konumlandırır
+        Container.BindInterfacesAndSelfTo<CameraCalculator>()
+            .FromComponentOn(gameCamera.gameObject)
+            .AsSingle();
+
+        // BlockBehaviourFactory — RawBehaviourEntry'den IBlockBehaviour üreten fabrika
+        Container.Bind<BlockBehaviourFactory>().AsSingle();
 
         // BlockFactory — GameConfig üzerinden shape prefabını bulur ve spawn eder
         Container.Bind<BlockFactory>().AsSingle();
@@ -43,5 +65,21 @@ public class GameplayInstaller : MonoInstaller
 
         // UIManager
         Container.BindInterfacesAndSelfTo<UIManager>().AsSingle();
+
+        // UI Panels — sahnedeki instance'lar Zenject'e inject edilebilir hale gelir
+        Container.BindInstance(gameplayPanel).AsSingle();
+        Container.BindInstance(winPanel).AsSingle();
+        Container.BindInstance(losePanel).AsSingle();
+
+        // VFXSystem
+        Container.BindInterfacesAndSelfTo<VFXSystem>().AsSingle();
+
+        // AudioController
+        Container.BindInstance(gameConfig.AudioConfig).AsSingle();
+        Container.BindInterfacesAndSelfTo<AudioController>().AsSingle();
+
+        // GridDebugger — opsiyonel; sahnede yoksa atlanır
+        if (gridDebugger != null)
+            Container.QueueForInject(gridDebugger);
     }
 }

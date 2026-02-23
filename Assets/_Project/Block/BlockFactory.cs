@@ -1,30 +1,30 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.TextCore;
 using Zenject;
 
-// BlockData'ya göre doğru shape prefabını bulan ve BlockFacade'ı initialize eden fabrika sınıfı
-// Her shape'in kendi prefabı vardır; GameConfig.BlockShapes listesinden ShapeId ile aranır
-// Zenject DiContainer kullanarak prefabı instantiate eder ve [Inject] bağımlılıklarını çözer
+// BlockData'ya göre doğru shape prefabını bulan, BlockFacade'i initialize eden ve davranışları ekleyen fabrika
 public class BlockFactory
 {
     private readonly DiContainer container;
-
-    // Tüm shape tanımları ve prefab referanslarını içeren merkezi config
     private readonly GameConfig gameConfig;
-
-    // Sahne içinde spawn edilen tüm blokları takip eder; DestroyAll için kullanılır
+    private readonly BlockBehaviourFactory behaviourFactory;
     private readonly List<BlockFacade> spawnedBlocks = new List<BlockFacade>();
+    // Shape prefabına göre pool
+    private readonly Dictionary<BlockShapeData, Queue<BlockFacade>> pool = new();
 
     [Inject]
-    public BlockFactory(DiContainer container, GameConfig gameConfig)
+    public BlockFactory(DiContainer container, GameConfig gameConfig, BlockBehaviourFactory behaviourFactory)
     {
-        this.container  = container;
+        this.container = container;
         this.gameConfig = gameConfig;
+        this.behaviourFactory = behaviourFactory;
     }
 
     // BlockData'ya göre ilgili prefabı bulur, spawn eder ve initialize eder
     // Dönen BlockFacade zaten GridPosition, Color, Type ve görselleriyle hazır durumdadır
-    public BlockFacade Create(BlockData blockData)
+    public BlockFacade Create(BlockData blockData, List<Vector2Int> shapeCells)
     {
         BlockShapeData shapeData = gameConfig.GetShape(blockData.ShapeId);
 
@@ -40,23 +40,62 @@ public class BlockFactory
             return null;
         }
 
-        // Zenject ile instantiate: [Inject] alanları otomatik doldurulur
-        BlockFacade facade = container.InstantiatePrefabForComponent<BlockFacade>(shapeData.Prefab);
-        facade.Initialize(blockData);
+        BlockFacade facade = GetOrCreate(shapeData);
+        facade.gameObject.SetActive(true);
+        facade.OnSpawned();
+        facade.Initialize(blockData, shapeCells);
+        // Exit tamamlanınca bu blok kendi kendini pool'a geri koyar
+        facade.OnReturnToPool = () => ReturnToPool(facade, shapeData);
+
+        if (blockData.Behaviours != null)
+            foreach (var entry in blockData.Behaviours)
+            {
+                var behaviour = behaviourFactory.Create(entry);
+                if (behaviour != null) facade.AddBehaviour(behaviour);
+            }
 
         spawnedBlocks.Add(facade);
         return facade;
     }
 
-    // Level bitiminde veya restart'ta tüm blok nesnelerini sahneden kaldırır
+    private BlockFacade GetOrCreate(BlockShapeData shapeData)
+    {
+        if (pool.TryGetValue(shapeData, out var queue) && queue.Count > 0)
+            return queue.Dequeue();
+        return container.InstantiatePrefabForComponent<BlockFacade>(shapeData.Prefab);
+    }
+
+    private void ReturnToPool(BlockFacade facade, BlockShapeData shapeData)
+    {
+        spawnedBlocks.Remove(facade);
+        facade.OnDespawned();
+        facade.transform.SetParent(null); // levelRoot destroy edilince blok yok olmasın
+        facade.gameObject.SetActive(false);
+        if (!pool.TryGetValue(shapeData, out var queue))
+        {
+            queue = new Queue<BlockFacade>();
+            pool[shapeData] = queue;
+        }
+        queue.Enqueue(facade);
+    }
+
+    // Level bitiminde veya restart'ta aktif tüm blokları pool'a geri koyar
     public void DestroyAll()
     {
-        foreach (BlockFacade block in spawnedBlocks)
+        // Kopya alıyoruz çünkü ReturnToPool spawnedBlocks'u değiştiriyor
+        var toReturn = new List<BlockFacade>(spawnedBlocks);
+        foreach (BlockFacade block in toReturn)
         {
-            if (block != null)
-                Object.Destroy(block.gameObject);
+            if (block == null) continue;
+            var shapeData = gameConfig.GetShape(block.ShapeId);
+            if (shapeData != null)
+                ReturnToPool(block, shapeData);
+            else
+            {
+                block.OnDespawned();
+                block.gameObject.SetActive(false);
+            }
         }
-
         spawnedBlocks.Clear();
     }
 }

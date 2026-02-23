@@ -7,6 +7,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameConfig", menuName = "BlockFlow/Game Config")]
 public class GameConfig : ScriptableObject
 {
+    [Header("Levels")]
+    // Tüm level JSON dosyaları — sıra önemlidir, index ile erişilir
+    public List<TextAsset> Levels = new List<TextAsset>();
+
     [Header("Block Shapes")]
     // Oyundaki tüm blok şekil tanımları — BlockFactory ShapeId ile buradan prefab arar
     public List<BlockShapeData> BlockShapes = new List<BlockShapeData>();
@@ -18,9 +22,20 @@ public class GameConfig : ScriptableObject
 
 
     [Header("Exit Prefabs")]
-    // Çıkış boyutuna göre farklı prefablar — boyut (size) 1'den başlar
-    // Size=1 için index 0, Size=2 için index 1 şeklinde erişilir
     public List<GameObject> ExitPrefabsBySize = new List<GameObject>();
+
+    [Header("Behaviour Configs")]
+    public IceBehaviourConfig IceBehaviourConfig;
+
+    [Header("Colors")]
+    // BlockColor enum sırasıyla renkler — tüm görseller bu listeden okur
+    public List<Color> BlockColors;
+
+    [Header("VFX")]
+    public VFXConfig VFXConfig;
+
+    [Header("Audio")]
+    public AudioConfig AudioConfig;
 
     public BlockShapeData GetShape(string shapeId)
     {

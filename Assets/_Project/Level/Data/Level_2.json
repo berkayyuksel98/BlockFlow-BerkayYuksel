@@ -1,0 +1,121 @@
+{
+    "Rows": 6,
+    "Columns": 6,
+    "TimeLimit": 60.0,
+    "Blocks": [
+        {
+            "GridPosition": {
+                "x": 2,
+                "y": 2
+            },
+            "ShapeId": "2x2Shape",
+            "Color": 1,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": [
+                {
+                    "Type": 0,
+                    "DataJson": "{\"RequiredExitCount\":3}"
+                }
+            ]
+        },
+        {
+            "GridPosition": {
+                "x": 0,
+                "y": 0
+            },
+            "ShapeId": "SLShape",
+            "Color": 2,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 4,
+                "y": 1
+            },
+            "ShapeId": "PlusShape",
+            "Color": 2,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 0,
+                "y": 4
+            },
+            "ShapeId": "2x1Shape",
+            "Color": 0,
+            "Type": 2,
+            "MovementAxis": 1,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 4,
+                "y": 4
+            },
+            "ShapeId": "1x1Shape",
+            "Color": 0,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 3,
+                "y": 5
+            },
+            "ShapeId": "1x1Shape",
+            "Color": 2,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 0,
+                "y": 3
+            },
+            "ShapeId": "1x1Shape",
+            "Color": 1,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        }
+    ],
+    "Exits": [
+        {
+            "Color": 1,
+            "Side": 1,
+            "StartIndex": 2,
+            "Size": 2
+        },
+        {
+            "Color": 0,
+            "Side": 3,
+            "StartIndex": 2,
+            "Size": 1
+        },
+        {
+            "Color": 2,
+            "Side": 2,
+            "StartIndex": 3,
+            "Size": 1
+        },
+        {
+            "Color": 0,
+            "Side": 1,
+            "StartIndex": 0,
+            "Size": 2
+        },
+        {
+            "Color": 2,
+            "Side": 0,
+            "StartIndex": 3,
+            "Size": 3
+        }
+    ]
+}

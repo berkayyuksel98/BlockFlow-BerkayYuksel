@@ -1,9 +1,17 @@
 using UnityEngine;
 
-// BlockFlow oyununa ait tüm event yapıları bu dosyada toplanir
-// Struct kullanılır cunku sadece veri tasirlar heap allocation yapmazlar
+public struct LevelLoadedEvent : IGameEvent
+{
+    public int LevelIndex;
+}
 
-// Level tamamlandiginda kazanma veya kaybetme durumunda yayınlanan event
+// Grid boyutu belli olur olmaz yayınlanır; kamera bu event ile konumlanır
+public struct GridBuiltEvent : IGameEvent
+{
+    public int Columns;
+    public int Rows;
+}
+
 public struct LevelCompletedEvent : IGameEvent
 {
     public int LevelIndex;
@@ -11,6 +19,22 @@ public struct LevelCompletedEvent : IGameEvent
     public float RemainingTime;
 }
 
-
-// Geri sayım süresi sona erdiğinde LevelManager tarafından yayınlanan event
 public struct TimerExpiredEvent : IGameEvent { }
+
+public struct DragStartedEvent : IGameEvent { }
+public struct DragEndedEvent : IGameEvent { }
+
+public struct BlockExitedEvent : IGameEvent //blok tamamen çıkış noktasından çıktıktan sonra yayınlanır
+{
+    public BlockColor Color;
+}
+
+// Blok çıkış animasyonu başlarken yayınlanır; VFX sistemi buna subscribe olur
+public struct BlockExitStartedEvent : IGameEvent
+{
+    public BlockColor Color;
+    public Vector3 ExitWorldPosition;
+    public Vector3 ExitDirection;
+    public int ExitSize;
+    public float Duration;
+}

@@ -21,7 +21,9 @@ public class LevelEditorWindow : EditorWindow
     private BlockColor selectedColor = BlockColor.Red;
     private BlockType selectedType = BlockType.Normal;
     private MovementAxis selectedAxis = MovementAxis.Horizontal;
-    private int iceHealth = 2;
+    private readonly List<RawBehaviourEntry> pendingBehaviours = new List<RawBehaviourEntry>();
+    private BlockBehaviourType newBehaviourType = BlockBehaviourType.Ice;
+    private int iceRequiredExitCount = 1;
 
     private const float CellSize = 54f, CellPad = 3f;
     private Vector2 leftScroll, gridScroll;
@@ -43,7 +45,6 @@ public class LevelEditorWindow : EditorWindow
         { BlockColor.Green,  new Color(0.27f, 0.72f, 0.38f) },
         { BlockColor.Yellow, new Color(0.96f, 0.82f, 0.22f) },
         { BlockColor.Purple, new Color(0.66f, 0.27f, 0.86f) },
-        { BlockColor.Orange, new Color(0.96f, 0.56f, 0.17f) },
     };
 
     #endregion
@@ -111,7 +112,14 @@ public class LevelEditorWindow : EditorWindow
             selectedColor = (BlockColor)EditorGUILayout.EnumPopup("Renk",  selectedColor);
             selectedType  = (BlockType) EditorGUILayout.EnumPopup("Tip",   selectedType);
             if (selectedType == BlockType.SingleAxis) selectedAxis = (MovementAxis)EditorGUILayout.EnumPopup("Eksen", selectedAxis);
-            if (selectedType == BlockType.Iced)       iceHealth    = Mathf.Max(1, EditorGUILayout.IntField("Buz Sağlığı", iceHealth));
+
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("Davranışlar", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            newBehaviourType = (BlockBehaviourType)EditorGUILayout.EnumPopup(newBehaviourType);
+            if (GUILayout.Button("+ Ekle", GUILayout.Width(60))) AddPendingBehaviour(newBehaviourType);
+            EditorGUILayout.EndHorizontal();
+            for (int bi = pendingBehaviours.Count - 1; bi >= 0; bi--) DrawBehaviourEntry(bi);
             EditorGUILayout.Space(8);
             DrawBlockList();
         }
@@ -158,6 +166,35 @@ public class LevelEditorWindow : EditorWindow
         }
     }
 
+    // Yeni behaviour ekler; aynı tip tekrar eklenemez
+    private void AddPendingBehaviour(BlockBehaviourType type)
+    {
+        if (pendingBehaviours.Exists(b => b.Type == type)) return;
+        string dataJson = type == BlockBehaviourType.Ice
+            ? JsonUtility.ToJson(new IceBehaviourData { RequiredExitCount = iceRequiredExitCount })
+            : "{}";
+        pendingBehaviours.Add(new RawBehaviourEntry { Type = type, DataJson = dataJson });
+    }
+
+    // Davranış satırını ve tipo özgü ayarları çizer
+    private void DrawBehaviourEntry(int index)
+    {
+        var entry = pendingBehaviours[index];
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField(entry.Type.ToString(), GUILayout.Width(40));
+        if (entry.Type == BlockBehaviourType.Ice)
+        {
+            iceRequiredExitCount = EditorGUILayout.IntField("Gereken:", Mathf.Max(1, iceRequiredExitCount));
+            pendingBehaviours[index] = new RawBehaviourEntry
+            {
+                Type     = entry.Type,
+                DataJson = JsonUtility.ToJson(new IceBehaviourData { RequiredExitCount = iceRequiredExitCount }),
+            };
+        }
+        if (GUILayout.Button("✕", GUILayout.Width(22))) pendingBehaviours.RemoveAt(index);
+        EditorGUILayout.EndHorizontal();
+    }
+
     private void DrawGrid()
     {
         if (levelData == null) return;
@@ -186,7 +223,8 @@ public class LevelEditorWindow : EditorWindow
             if (blockAt != null)
             {
                 bg = colors.TryGetValue(blockAt.Color, out var bc) ? bc : Color.gray;
-                if (blockAt.Type == BlockType.Iced) bg = Color.Lerp(bg, new Color(0.60f, 0.88f, 1f), 0.45f);
+                bool hasIce = blockAt.Behaviours != null && blockAt.Behaviours.Exists(b => b.Type == BlockBehaviourType.Ice);
+                if (hasIce) bg = Color.Lerp(bg, new Color(0.60f, 0.88f, 1f), 0.45f);
             }
             else if (preview) { var p = colors.TryGetValue(selectedColor, out var pc) ? pc : Color.gray; bg = new Color(p.r, p.g, p.b, 0.35f); }
             else               { bg = hover ? new Color(0.33f, 0.33f, 0.33f) : new Color(0.19f, 0.19f, 0.19f); }
@@ -201,7 +239,13 @@ public class LevelEditorWindow : EditorWindow
             if (blockAt != null)
             {
                 string lbl = string.IsNullOrEmpty(blockAt.ShapeId) ? "?" : blockAt.ShapeId;
-                if      (blockAt.Type == BlockType.Iced)       lbl += "\nICE:" + blockAt.IceHealth;
+                bool hasIceLbl = blockAt.Behaviours != null && blockAt.Behaviours.Exists(b => b.Type == BlockBehaviourType.Ice);
+                if (hasIceLbl)
+                {
+                    var ie = blockAt.Behaviours.Find(b => b.Type == BlockBehaviourType.Ice);
+                    var id = string.IsNullOrEmpty(ie.DataJson) ? new IceBehaviourData() : JsonUtility.FromJson<IceBehaviourData>(ie.DataJson);
+                    lbl += "\nICE:" + id.RequiredExitCount;
+                }
                 else if (blockAt.Type == BlockType.SingleAxis) lbl += blockAt.MovementAxis == MovementAxis.Horizontal ? "\n↔" : "\n↕";
                 GUI.Label(cell, lbl, CellLabel());
             }
@@ -237,7 +281,7 @@ public class LevelEditorWindow : EditorWindow
             Color = selectedColor,
             Type = selectedType,
             MovementAxis = selectedType == BlockType.SingleAxis ? selectedAxis : MovementAxis.Free,
-            IceHealth = selectedType == BlockType.Iced ? iceHealth : 0,
+            Behaviours = new List<RawBehaviourEntry>(pendingBehaviours),
         });
     }
 
@@ -255,7 +299,9 @@ public class LevelEditorWindow : EditorWindow
 
     private void OpenJson()
     {
-        string path = EditorUtility.OpenFilePanel("Level JSON Aç", Application.dataPath, "json");
+        string defaultDir = Path.Combine(Application.dataPath, "_Project", "Level", "Data");
+        if (!Directory.Exists(defaultDir)) defaultDir = Application.dataPath;
+        string path = EditorUtility.OpenFilePanel("Level JSON Aç", defaultDir, "json");
         if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
         var data = JsonUtility.FromJson<LevelData>(File.ReadAllText(path));
         if (data == null) return;

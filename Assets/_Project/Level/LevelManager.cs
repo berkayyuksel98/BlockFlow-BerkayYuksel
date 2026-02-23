@@ -1,10 +1,11 @@
 using Cysharp.Threading.Tasks;
+using System;
 using System.Threading;
 using UnityEngine;
 using Zenject;
 
 // Level yaşam döngüsünü yöneten sınıf — JSON yükleme, timer ve GridManager koordinasyonu
-public class LevelManager : IInitializable, ILevelManager
+public class LevelManager : IInitializable, IDisposable, ILevelManager
 {
     // Level indeksi PlayerPrefs'te kalıcı olarak saklanır
     public int CurrentLevelIndex
@@ -27,42 +28,53 @@ public class LevelManager : IInitializable, ILevelManager
     private float remainingTime;
     private bool isTimerRunning;
     private CancellationTokenSource cancellationTokenSource;
+    private int remainingBlockCount;
 
     private readonly GridManager gridManager;
     private readonly IEventBus eventBus;
-    private const string LevelResourcePath = "Levels/Level_";
-
+    private readonly GameConfig gameConfig;
 
     [Inject]
-    public LevelManager(GridManager gridManager, IEventBus eventBus)
+    public LevelManager(GridManager gridManager, IEventBus eventBus, GameConfig gameConfig)
     {
         this.gridManager = gridManager;
-        this.eventBus = eventBus;
+        this.eventBus    = eventBus;
+        this.gameConfig  = gameConfig;
     }
 
 
     public void Initialize()
     {
+        eventBus.Subscribe<BlockExitedEvent>(OnBlockExited);
         LoadLevel(CurrentLevelIndex);
     }
 
     public void LoadLevel(int index)
     {
+        LoadLevelAsync(index).Forget();
+    }
+
+    private async UniTaskVoid LoadLevelAsync(int index)
+    {
         StopTimer();
 
-        string path = LevelResourcePath + index;
-        TextAsset jsonFile = Resources.Load<TextAsset>(path);
+        // Gerçek veri indeksi: level listesi bitince başa döner
+        int dataIndex = gameConfig.Levels.Count > 0 ? index % gameConfig.Levels.Count : 0;
+        TextAsset jsonFile = gameConfig.Levels.Count > 0 ? gameConfig.Levels[dataIndex] : null;
 
         if (jsonFile == null)
         {
-            Debug.LogError($"[LevelManager] Level dosyası bulunamadı: Resources/{path}.json");
+            Debug.LogError($"[LevelManager] Level dosyası bulunamadı: GameConfig.Levels[{dataIndex}]");
             return;
         }
 
         CurrentLevel = JsonUtility.FromJson<LevelData>(jsonFile.text);
         CurrentLevelIndex = index;
 
-        gridManager.BuildLevel(CurrentLevel); // GridManager'a level verisini göndererek sahneyi kurmasını sağlar
+        // Blok spawn animasyonları bitene kadar bekle
+        await gridManager.BuildLevel(CurrentLevel);
+        remainingBlockCount = CurrentLevel.Blocks.Count;
+        eventBus.Publish(new LevelLoadedEvent { LevelIndex = CurrentLevelIndex });
         StartTimer(CurrentLevel.TimeLimit).Forget();
     }
 
@@ -109,6 +121,28 @@ public class LevelManager : IInitializable, ILevelManager
         cancellationTokenSource?.Dispose();
         cancellationTokenSource = null;
     }
+
+    private void OnBlockExited(BlockExitedEvent e)
+    {
+        remainingBlockCount--;
+        if (remainingBlockCount <= 0)
+        {
+            StopTimer();
+            eventBus.Publish(new LevelCompletedEvent
+            {
+                LevelIndex    = CurrentLevelIndex,
+                IsWin         = true,
+                RemainingTime = GetRemainingTime(),
+            });
+        }
+    }
+
+    public void Dispose()
+    {
+        eventBus?.Unsubscribe<BlockExitedEvent>(OnBlockExited);
+        StopTimer();
+    }
+
     public float GetRemainingTime() => Mathf.Max(remainingTime, 0f);
 }
 

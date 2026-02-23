@@ -1,0 +1,60 @@
+{
+    "Rows": 4,
+    "Columns": 4,
+    "TimeLimit": 60.0,
+    "Blocks": [
+        {
+            "GridPosition": {
+                "x": 0,
+                "y": 1
+            },
+            "ShapeId": "2x1Shape",
+            "Color": 0,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 3,
+                "y": 3
+            },
+            "ShapeId": "1x1Shape",
+            "Color": 1,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 2,
+                "y": 0
+            },
+            "ShapeId": "SLShape",
+            "Color": 0,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        }
+    ],
+    "Exits": [
+        {
+            "Color": 1,
+            "Side": 2,
+            "StartIndex": 3,
+            "Size": 1
+        },
+        {
+            "Color": 0,
+            "Side": 3,
+            "StartIndex": 1,
+            "Size": 1
+        },
+        {
+            "Color": 0,
+            "Side": 0,
+            "StartIndex": 2,
+            "Size": 2
+        }
+    ]
+}

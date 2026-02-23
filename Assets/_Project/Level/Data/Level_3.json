@@ -1,0 +1,149 @@
+{
+    "Rows": 6,
+    "Columns": 6,
+    "TimeLimit": 60.0,
+    "Blocks": [
+        {
+            "GridPosition": {
+                "x": 2,
+                "y": 0
+            },
+            "ShapeId": "TShape",
+            "Color": 1,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 4,
+                "y": 4
+            },
+            "ShapeId": "PlusShape",
+            "Color": 2,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 0,
+                "y": 3
+            },
+            "ShapeId": "LShape",
+            "Color": 3,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 4,
+                "y": 2
+            },
+            "ShapeId": "2x1Shape",
+            "Color": 4,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 0,
+                "y": 1
+            },
+            "ShapeId": "2x1Shape",
+            "Color": 4,
+            "Type": 2,
+            "MovementAxis": 0,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 1,
+                "y": 5
+            },
+            "ShapeId": "2x1Shape",
+            "Color": 0,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": [
+                {
+                    "Type": 0,
+                    "DataJson": "{\"RequiredExitCount\":3}"
+                }
+            ]
+        },
+        {
+            "GridPosition": {
+                "x": 4,
+                "y": 1
+            },
+            "ShapeId": "1x1Shape",
+            "Color": 0,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 1,
+                "y": 4
+            },
+            "ShapeId": "1x1Shape",
+            "Color": 0,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        },
+        {
+            "GridPosition": {
+                "x": 2,
+                "y": 2
+            },
+            "ShapeId": "1x1Shape",
+            "Color": 2,
+            "Type": 0,
+            "MovementAxis": 2,
+            "Behaviours": []
+        }
+    ],
+    "Exits": [
+        {
+            "Color": 2,
+            "Side": 1,
+            "StartIndex": 5,
+            "Size": 1
+        },
+        {
+            "Color": 2,
+            "Side": 2,
+            "StartIndex": 3,
+            "Size": 3
+        },
+        {
+            "Color": 3,
+            "Side": 1,
+            "StartIndex": 1,
+            "Size": 2
+        },
+        {
+            "Color": 4,
+            "Side": 3,
+            "StartIndex": 1,
+            "Size": 1
+        },
+        {
+            "Color": 1,
+            "Side": 0,
+            "StartIndex": 3,
+            "Size": 3
+        },
+        {
+            "Color": 0,
+            "Side": 3,
+            "StartIndex": 2,
+            "Size": 1
+        }
+    ]
+}
