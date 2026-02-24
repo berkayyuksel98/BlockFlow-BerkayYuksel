@@ -37,48 +37,48 @@ Assets/_Project/
 
 ## Önemli Sınıflar 
 
-**GameConfig**
+**GameConfig**<br>
 Projedeki tek merkezi ScriptableObject
 Blok renkleri level JSON dosyaları shape verileri exit prefabları duvar prefabları ses ve VFX configleri burada toplanıyor
 Bir şeyi değiştirmek istediğinde ilk bakman gereken yer burası
 
-**GridManager**
+**GridManager**<br>
 Grid mantığını tamamen yönetiyor
 Hücre doluluğunu takip ediyor blokların nereye gidebileceğini hesaplıyor ve çıkış eşleşmelerini kontrol ediyor
 Aynı zamanda duvar exit ve zemin objelerini object pool ile spawn ve despawn ediyor
 
-* **BlockFacade**
+* **BlockFacade**<br>
 Her bloğun sahne tarafındaki yüzü
 Sürükleme girişini alıyor hareketi hesaplıyor ve çıkış tetiklendiğinde animasyonu başlatıyor
 IPoolableBlock interface'ini implement ediyor bu sayede pool'dan çıkarken ve geri dönerken temiz bir state garantisi var
 
-* **BlockFactory**
+* **BlockFactory**<br>
 Shape bazlı object pool kullanıyor
 Aynı shape tipinden bir blok gerektiğinde önce pool'a bakıyor yoksa yeni instantiate ediyor
 Level bitiminde blokları destroy etmiyor sadece pool'a geri gönderiyor
 
-* **LevelManager**
+* **LevelManager**<br>
 JSON dosyasını okuyup LevelData'ya çeviriyor ve GridManager'a bildiriyor
 Tüm blokların çıkışını sayıyor sıfıra düştüğünde kazanma eventini yayınlıyor
 Aynı zamanda geri sayım timer'ını UniTask ile yönetiyor süre bitince TimerExpiredEvent yayınlıyor
 
-* **EventBus**
+* **EventBus**<br>
 Sistemler arasındaki iletişimi struct tabanlı event'lerle sağlıyor
 Hiçbir sistem bir diğerine direkt referans tutmuyor bu sayede bağımlılıklar minimize edilmiş
 
-* **UIManager**
+* **UIManager**<br>
 EventBus'a subscribe olup LevelLoadedEvent ve LevelCompletedEvent'e göre panelleri açıp kapatıyor
 Panel geçişlerinde UniTask ile bekleme yapıyor ve CancellationToken ile oyun kapandığında güvenli şekilde iptal ediyor
 
-* **CameraCalculator**
+* **CameraCalculator**<br>
 GridBuiltEvent geldiği anda grid boyutuna ve ayarladığın pitch açısına göre kamerayı otomatik konumlandırıyor
 FOV tabanlı basit bir formül kullanıyor Inspector'dan padding ve z offset ayarlayabiliyorsun
 
-* **VFXSystem**
+* **VFXSystem**<br>
 particle prefablarını generic bir Dictionary pool ile yönetiyor
 BlockExitStartedEvent ve LevelCompletedEvent'e subscribe oluyor
 
-* **AudioController**
+* **AudioController**<br>
 Pure C# sınıfı MonoBehaviour değil
 EventBus üzerindeki olayları dinleyerek ilgili ses efektini AudioConfig üzerinden çalıyor
 
@@ -86,41 +86,41 @@ EventBus üzerindeki olayları dinleyerek ilgili ses efektini AudioConfig üzeri
 
 ## Design Pattern'lar ve Teknolojiler
 
-**Zenject**
+* **Zenject**<br>
 Tüm sistemler constructor injection ile oluşturulur
 MonoBehaviour olmayan pure C# sınıfları Zenject tarafından new'lenir ve bağımlılıkları otomatik enjekte edilir
 GameplayInstaller sahneye bağlı tek kurulum noktasıdır
 
-**EventBus (Observer Pattern)**
+* **EventBus (Observer Pattern)**<br>
 IGameEvent interface'ini implement eden struct'lar yayınlanıp dinlenebilir
 Sistemler birbirini tanımak zorunda değildir yalnızca event tipini bilmesi yeterlidir
 
-**Object Pooling**
+* **Object Pooling**<br>
 BlockFactory bloklar için shape bazlı pool kullanır
 GridManager exit duvar köşe ve zemin objeleri için prefab bazlı generic Dictionary pool kullanır
 VFXSystem partikül prefabları için aynı yaklaşımı uygular
 
-**Strategy Pattern**
+* **Strategy Pattern**<br>
 IMovementStrategy interface'i ile blok hareket davranışı runtime'da değiştirilebilir
 SingleAxisMovementStrategy yatay ya da dikey ekseni kısıtlar
 FreeMovementStrategy her yönde serbest bırakır
 
-**Facade Pattern**
+* **Facade Pattern**<br>
 BlockFacade dışarıya yalnızca temiz bir API sunar
 İçinde hareket stratejisi görseller behaviour'lar ve event yayını kapsüllenir
 
-**Factory Pattern**
+* **Factory Pattern**<br>
 BlockFactory ve BlockBehaviourFactory veri modelinden somut objeyi üretir
 
-**Decorator Pattern (Behaviour Sistemi)**
+* **Decorator Pattern (Behaviour Sistemi)**<br>
 IBlockBehaviour interface'ini implement eden sınıflar blok üzerine eklenerek davranış katmanları oluşturulur
 Örneğin IceBehaviour bloğa buz kırılma mekaniği ekler buz kalkmadan blok hareket edemez
 
-**UniTask**
+* **UniTask**<br>
 Coroutine yerine tercih edilir
 Spawn animasyonları arasındaki bekleme timer ve panel geçiş gecikmelerinde kullanılır
 
-**DOTween**
+* **DOTween**<br>
 Blok spawn scale animasyonu çıkış animasyonu ve UI panel animasyonlarında kullanılır
 
 ---
@@ -133,6 +133,8 @@ Açılan pencerede grid boyutu belirlenir kaç satır kaç sütun olacağı giri
 
 Blok ekle bölümünden ShapeId renk tip ve başlangıç pozisyonu seçilerek blok eklenir
 ShapeId GameConfig üzerindeki BlockShapeDatas listesindeki id ile eşleşmelidir
+
+Bloklara davranış eklemek için bir enum listesi var örnek Ice behaviour eklemek için ekle butonuna tıklayıp istenen değerler (ice değeri ne olacak?) girilir
 
 Exit ekle bölümünden hangi kenara hangi renk için hangi hücreden başlayan ve kaç hücre genişliğinde çıkış istendiği belirtilir
 
