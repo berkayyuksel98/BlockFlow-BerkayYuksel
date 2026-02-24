@@ -12,7 +12,11 @@ Tüm bloklar çıktığında seviye tamamlanır süre bittiğinde ise seviye kay
 Bazı bloklar yalnızca yatay ya da yalnızca dikey hareket edebilirken bazıları her yöne serbeşce hareket edebilir
 
 ---
+##Gameplay Video
+https://github.com/user-attachments/assets/9e884fdb-39db-469d-b3c4-f4d0a698794d
 
+
+--
 ## Klasör Yapısı 
 
 ```
@@ -139,6 +143,7 @@ Kaydet butonuna basıldığında bir JSON dosyası oluşturulur
 Bu JSON dosyası GameConfig üzerindeki Levels listesine TextAsset olarak eklenir
 
 Sıralama önemlidir LevelManager listedeki index sırasına göre level yükler ve liste bittiğinde başa döner
+<img width="689" height="1207" alt="Screenshot 2026-02-24 at 09 50 23" src="https://github.com/user-attachments/assets/64e4d0fb-d6ad-4aa5-a23f-9f2a0a44a70f" />
 
 ---
 
