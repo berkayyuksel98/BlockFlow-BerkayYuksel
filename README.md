@@ -47,38 +47,38 @@ Grid mantığını tamamen yönetiyor
 Hücre doluluğunu takip ediyor blokların nereye gidebileceğini hesaplıyor ve çıkış eşleşmelerini kontrol ediyor
 Aynı zamanda duvar exit ve zemin objelerini object pool ile spawn ve despawn ediyor
 
-**BlockFacade**
+* **BlockFacade**
 Her bloğun sahne tarafındaki yüzü
 Sürükleme girişini alıyor hareketi hesaplıyor ve çıkış tetiklendiğinde animasyonu başlatıyor
 IPoolableBlock interface'ini implement ediyor bu sayede pool'dan çıkarken ve geri dönerken temiz bir state garantisi var
 
-**BlockFactory**
+* **BlockFactory**
 Shape bazlı object pool kullanıyor
 Aynı shape tipinden bir blok gerektiğinde önce pool'a bakıyor yoksa yeni instantiate ediyor
 Level bitiminde blokları destroy etmiyor sadece pool'a geri gönderiyor
 
-**LevelManager**
+* **LevelManager**
 JSON dosyasını okuyup LevelData'ya çeviriyor ve GridManager'a bildiriyor
 Tüm blokların çıkışını sayıyor sıfıra düştüğünde kazanma eventini yayınlıyor
 Aynı zamanda geri sayım timer'ını UniTask ile yönetiyor süre bitince TimerExpiredEvent yayınlıyor
 
-**EventBus**
+* **EventBus**
 Sistemler arasındaki iletişimi struct tabanlı event'lerle sağlıyor
 Hiçbir sistem bir diğerine direkt referans tutmuyor bu sayede bağımlılıklar minimize edilmiş
 
-**UIManager**
+* **UIManager**
 EventBus'a subscribe olup LevelLoadedEvent ve LevelCompletedEvent'e göre panelleri açıp kapatıyor
 Panel geçişlerinde UniTask ile bekleme yapıyor ve CancellationToken ile oyun kapandığında güvenli şekilde iptal ediyor
 
-**CameraCalculator**
+* **CameraCalculator**
 GridBuiltEvent geldiği anda grid boyutuna ve ayarladığın pitch açısına göre kamerayı otomatik konumlandırıyor
 FOV tabanlı basit bir formül kullanıyor Inspector'dan padding ve z offset ayarlayabiliyorsun
 
-**VFXSystem**
+* **VFXSystem**
 particle prefablarını generic bir Dictionary pool ile yönetiyor
 BlockExitStartedEvent ve LevelCompletedEvent'e subscribe oluyor
 
-**AudioController**
+* **AudioController**
 Pure C# sınıfı MonoBehaviour değil
 EventBus üzerindeki olayları dinleyerek ilgili ses efektini AudioConfig üzerinden çalıyor
 
